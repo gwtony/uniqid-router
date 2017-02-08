@@ -8,12 +8,11 @@ import (
 )
 
 func main() {
-	err := api.Init()
+	err := api.Init("uniqid_router.conf")
 	if err != nil {
 		fmt.Println("Init api failed")
 		return
 	}
-	api.SetConfig("uniqid_router.conf")
 	config := api.GetConfig()
 	log := api.GetLog()
 

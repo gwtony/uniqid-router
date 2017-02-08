@@ -3,9 +3,7 @@ package handler
 import (
 	//"time"
 	"gopkg.in/redis.v5"
-	//"github.com/gwtony/gapi/variable"
 	"github.com/gwtony/gapi/log"
-	//"github.com/gwtony/gapi/errors"
 )
 
 // Handler Redis handler
@@ -33,14 +31,16 @@ func InitRedisHandler(raddr []string, log log.Log) *RedisHandler {
 }
 
 func (rh *RedisHandler) Set(key string, value []byte, ttl int) error {
-	//TODO: long connection
 	rh.log.Debug("key is %s", key)
-	//rh.log.Debug("value is %s", value)
-	err := rh.rclient.Set(key, value, 0).Err()
-	//err := client.Set(key, string(value), time.Duration(ttl) * time.Second).Err()
+
+	//No expire, just for test
+	//err := rh.rclient.Set(key, value, 0).Err()
+	err := client.Set(key, string(value), time.Duration(ttl) * time.Second).Err()
 	if err != nil {
 		rh.log.Error("Set to redis failed", err)
 	}
+
+	//For debug
 	//val, err := client.Get(key).Result()
 	//if err != nil {
 	//	rh.log.Error("Get error", err)
@@ -48,6 +48,7 @@ func (rh *RedisHandler) Set(key string, value []byte, ttl int) error {
 	//	rh.log.Debug("Get value is ", string(val))
 	//}
 	//client.Close()
+
 	return err
 }
 

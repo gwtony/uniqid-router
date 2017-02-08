@@ -27,6 +27,7 @@ func EncodeMsgpack(uid, puid, pip, lip string, data []byte, pport, lport, dlen u
 		return nil, err
 	}
 
+	//For debug
 	//var rh RouterData
 	//r := bytes.NewReader(b)
 	//dec := codec.NewDecoder(r, &mh)

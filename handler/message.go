@@ -11,13 +11,3 @@ type RouterData struct {
 	Data []byte
 }
 
-//type RouterData struct {
-//	Uid []byte
-//	Puid []byte
-//	Pip []byte
-//	Pport uint16
-//	Lip []byte
-//	Lport uint16
-//	Dlen uint16
-//	Data []byte
-//}

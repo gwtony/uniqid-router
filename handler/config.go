@@ -48,20 +48,20 @@ func (conf *URouterConfig) ParseConfig(cf *config.Config) error {
 
 	conf.apiLoc, err = cf.C.GetString("urouter", "api_location")
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "[Info] [URouter] Read conf: No api_location, use default location", UROUTER_DEFAULT_LOC)
+		fmt.Fprintln(os.Stderr, "[Info] [urouter] Read conf: No api_location, use default location", UROUTER_DEFAULT_LOC)
 		conf.apiLoc = UROUTER_DEFAULT_LOC
 	}
 
 	timeout, err := cf.C.GetInt64("urouter", "timeout")
 	if err != nil || timeout <= 0 {
-		fmt.Fprintln(os.Stderr, "[Info] [URouter] Read conf: use default purge_timeout: ", UROUTER_DEFAULT_TIMEOUT)
+		fmt.Fprintln(os.Stderr, "[Info] [urouter] Read conf: use default purge_timeout: ", UROUTER_DEFAULT_TIMEOUT)
 		timeout = UROUTER_DEFAULT_TIMEOUT
 	}
 	conf.timeout =  time.Duration(timeout) * time.Second
 
 	conf.token, err = cf.C.GetString("urouter", "token")
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "[Info] [URouter] Read conf: No token")
+		fmt.Fprintln(os.Stderr, "[Info] [urouter] Read conf: No token")
 		conf.token = ""
 	}
 

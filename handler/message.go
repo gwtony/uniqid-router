@@ -11,3 +11,7 @@ type RouterData struct {
 	Data []byte
 }
 
+type RedisMessage struct {
+	Key string
+	Value []byte
+}

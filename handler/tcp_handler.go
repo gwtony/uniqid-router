@@ -3,8 +3,8 @@ package handler
 import (
 	"io"
 	"net"
-	"bytes"
-	"compress/zlib"
+	//"bytes"
+	//"compress/zlib"
 	"encoding/binary"
 	"github.com/gwtony/gapi/log"
 )
@@ -64,8 +64,7 @@ func (handler *URouterHandler) ReadAndParse(conn net.Conn) ([]byte, error) {
 	}
 }
 func (handler *URouterHandler) ServTcp(conn net.Conn) {
-	var hdata bytes.Buffer
-
+	//var hdata bytes.Buffer
 	for {
 		//TODO: performance
 		frame, err := handler.ReadAndParse(conn)
@@ -83,27 +82,27 @@ func (handler *URouterHandler) ServTcp(conn net.Conn) {
 		lport := binary.BigEndian.Uint16(frame[74:76])
 		hlen := binary.BigEndian.Uint16(frame[76:78])
 
-		//handler.log.Debug("uid: %s, puid: %s, pip: %s, pport: %d, lip: %s, lport: %d, dlen: %d", uid, puid, pip, pport, lip, lport, hlen)
+		//NO ZIP
+		//var hdata bytes.Buffer
+		//hdata.Reset()
+		//w, err := zlib.NewWriterLevel(&hdata, zlib.BestSpeed)
+		//w := zlib.NewWriter(&hdata)
+		//if err != nil {
+		//	handler.log.Error("New zlib writer failed")
+		//	//continue
+		//	return
+		//}
+		//w.Write(frame[78:])
+		//w.Close()
 
-		hdata.Reset()
-		w, err := zlib.NewWriterLevel(&hdata, zlib.BestSpeed)
-		if err != nil {
-			handler.log.Error("New zlib writer failed")
-			continue
-		}
+		//Need not to goroutine
+		mpdata, err := EncodeMsgpack(uid, puid, pip, lip, frame[78:], pport, lport, hlen)
 
-		w.Write(frame[78:])
-		w.Close()
-
-		mpdata, err := EncodeMsgpack(uid, puid, pip, lip, hdata.Bytes(), pport, lport, hlen)
 		if err != nil {
 			handler.log.Error("Encode msgpack failed")
 			continue
 		}
 
-		err = handler.rh.Set(uid, mpdata, UROUTER_DEFAULT_TTL)
-		if err != nil {
-			handler.log.Error("Set to Redis failed")
-		}
+		handler.rh.RedisSet(uid, mpdata)
 	}
 }

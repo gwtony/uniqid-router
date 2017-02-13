@@ -1,7 +1,7 @@
 package handler
 
 import (
-	//"time"
+	"time"
 	"gopkg.in/redis.v5"
 	"github.com/gwtony/gapi/log"
 )
@@ -13,6 +13,7 @@ type RedisHandler struct {
 	loc        string
 	log        log.Log
 	rclient    *redis.Client
+	ch         chan *RedisMessage
 }
 
 // InitHandler inits redis handler
@@ -25,9 +26,36 @@ func InitRedisHandler(raddr []string, log log.Log) *RedisHandler {
 		Addr:     h.raddr[0],
 		Password: "", // no password set
 		DB:       0,  // use default DB
+		//PoolTimeout: 10,
+		PoolSize: 40,
 	})
+	h.ch = make(chan *RedisMessage, 100000)
+
+	i := 0
+	for {
+		i++
+		go h.Run()
+		if i >= 40 {
+			break
+		}
+	}
 
 	return h
+}
+
+func (rh *RedisHandler) Run() {
+	var rm *RedisMessage
+	for {
+		rm = <-rh.ch
+		rh.Set(rm.Key, rm.Value, UROUTER_DEFAULT_TTL)
+	}
+}
+
+func (rh *RedisHandler) RedisSet(key string, value []byte) {
+	var rm RedisMessage
+	rm.Key = key
+	rm.Value = value
+	rh.ch<-&rm
 }
 
 func (rh *RedisHandler) Set(key string, value []byte, ttl int) error {
@@ -35,7 +63,7 @@ func (rh *RedisHandler) Set(key string, value []byte, ttl int) error {
 
 	//No expire, just for test
 	//err := rh.rclient.Set(key, value, 0).Err()
-	err := client.Set(key, string(value), time.Duration(ttl) * time.Second).Err()
+	err := rh.rclient.Set(key, string(value), time.Duration(ttl) * time.Second).Err()
 	if err != nil {
 		rh.log.Error("Set to redis failed", err)
 	}

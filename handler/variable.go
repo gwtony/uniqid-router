@@ -25,7 +25,7 @@ const (
 	UROUTER_DEFAULT_LOC       = "/urouter"
 	DEFAULT_REDIS_PORT        = "6379"
 
-	UROUTER_DEFAULT_TTL       = 60
+	UROUTER_DEFAULT_TTL       = 1800
 
 	UROUTER_DEFAULT_TIMEOUT   = 5
 

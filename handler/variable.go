@@ -24,6 +24,7 @@ const (
 
 	UROUTER_DEFAULT_LOC       = "/urouter"
 	DEFAULT_REDIS_PORT        = "6379"
+	REDIS_POOL_SIZE           = 10
 
 	UROUTER_DEFAULT_TTL       = 1800
 

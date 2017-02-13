@@ -27,15 +27,15 @@ func InitRedisHandler(raddr []string, log log.Log) *RedisHandler {
 		Password: "", // no password set
 		DB:       0,  // use default DB
 		//PoolTimeout: 10,
-		PoolSize: 40,
+		//PoolSize: 10, default pool size is 10
 	})
-	h.ch = make(chan *RedisMessage, 100000)
+	h.ch = make(chan *RedisMessage, 1000)
 
 	i := 0
 	for {
 		i++
 		go h.Run()
-		if i >= 40 {
+		if i >= REDIS_POOL_SIZE {
 			break
 		}
 	}

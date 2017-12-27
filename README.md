@@ -1,4 +1,4 @@
-#Uniqid Router
+# Uniqid Router
 ## Config
 ```
 [default]
@@ -7,5 +7,4 @@ log: ../log/urouter.log
 level: info
 [urouter]
 redis_addr: redis_ip:redis_port
-
 ```

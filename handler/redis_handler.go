@@ -3,7 +3,7 @@ package handler
 import (
 	"time"
 	"gopkg.in/redis.v5"
-	"github.com/gwtony/gapi/log"
+	"github.com/gwtony/logger"
 )
 
 // Handler Redis handler
@@ -11,13 +11,13 @@ type RedisHandler struct {
 	raddr      []string
 	raddrSize  int
 	loc        string
-	log        log.Log
+	log        logger.Log
 	rclient    *redis.Client
 	ch         chan *RedisMessage
 }
 
 // InitHandler inits redis handler
-func InitRedisHandler(raddr []string, log log.Log) *RedisHandler {
+func InitRedisHandler(raddr []string, log logger.Log) *RedisHandler {
 	h := &RedisHandler{}
 	h.raddr = raddr
 	h.raddrSize = len(raddr)
@@ -26,6 +26,7 @@ func InitRedisHandler(raddr []string, log log.Log) *RedisHandler {
 		Addr:     h.raddr[0],
 		Password: "", // no password set
 		DB:       0,  // use default DB
+		//use default dial timeout 5s, read and write timeout 3s
 		//PoolTimeout: 10,
 		//PoolSize: 10, default pool size is 10
 	})
@@ -45,9 +46,17 @@ func InitRedisHandler(raddr []string, log log.Log) *RedisHandler {
 
 func (rh *RedisHandler) Run() {
 	var rm *RedisMessage
+	cur := time.Now()
+	tsb := cur.UnixNano() / 1000000
+	tse := cur.UnixNano() / 1000000
 	for {
 		rm = <-rh.ch
+		cur = time.Now()
+		tsb = cur.UnixNano() / 1000000
 		rh.Set(rm.Key, rm.Value, UROUTER_DEFAULT_TTL)
+		cur = time.Now()
+		tse = cur.UnixNano() / 1000000
+		rh.log.Debug("Redis set cost in ms", logger.Int64("cost_ms", tse - tsb))
 	}
 }
 
@@ -59,13 +68,13 @@ func (rh *RedisHandler) RedisSet(key string, value []byte) {
 }
 
 func (rh *RedisHandler) Set(key string, value []byte, ttl int) error {
-	rh.log.Debug("key is %s", key)
+	rh.log.Debug("Set key", logger.String("key", key))
 
 	//No expire, just for test
 	//err := rh.rclient.Set(key, value, 0).Err()
 	err := rh.rclient.Set(key, string(value), time.Duration(ttl) * time.Second).Err()
 	if err != nil {
-		rh.log.Error("Set to redis failed", err)
+		rh.log.Error("Set to redis failed", logger.Err(err))
 	}
 
 	//For debug

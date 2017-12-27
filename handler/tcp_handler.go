@@ -6,21 +6,21 @@ import (
 	//"bytes"
 	//"compress/zlib"
 	"encoding/binary"
-	"github.com/gwtony/gapi/log"
+	"github.com/gwtony/logger"
 )
 
 // AddHandler urouter udp handler
 type URouterHandler struct {
 	rh     *RedisHandler
 	token  string
-	log    log.Log
+	log    logger.Log
 }
 
 func (handler *URouterHandler) ReadAndParse(conn net.Conn) ([]byte, error) {
 	var n, dlen, left uint16
 	var headFlag = 1
 	head := make([]byte, 3)
-	recv := make([]byte, 8192)
+	recv := make([]byte, UROUTER_DEFAULT_TCP_SIZE)
 
 	n = 3
 	for  {
@@ -28,7 +28,7 @@ func (handler *URouterHandler) ReadAndParse(conn net.Conn) ([]byte, error) {
 			s, err := conn.Read(head[3-n:])
 			if err != nil {
 				if err != io.EOF {
-					handler.log.Error("Read failed: %s", err)
+					handler.log.Error("Read failed", logger.Err(err))
 				}
 				return nil, err
 			}
@@ -38,7 +38,7 @@ func (handler *URouterHandler) ReadAndParse(conn net.Conn) ([]byte, error) {
 			}
 			magic := head[0]
 			//handler.log.Debug("magic is %x", magic)
-			if magic != 0x77 {
+			if magic != UNIQID_MAGIC {
 				handler.log.Error("Data magic is invalid")
 				return nil, InvalidMagicError
 			}
@@ -48,9 +48,10 @@ func (handler *URouterHandler) ReadAndParse(conn net.Conn) ([]byte, error) {
 			continue
 		}
 
+		//dlen will not larger than UROUTER_DEFAULT_TCP_SIZE
 		s, err := conn.Read(recv[dlen - left: dlen])
 		if err != nil {
-			handler.log.Error("Read body failed: %s", err)
+			handler.log.Error("Read body failed", logger.Err(err))
 			return nil, err
 		}
 
@@ -69,7 +70,7 @@ func (handler *URouterHandler) ServTcp(conn net.Conn) {
 		//TODO: performance
 		frame, err := handler.ReadAndParse(conn)
 		if err != nil {
-			handler.log.Error("Read and parse failed: %s", err)
+			handler.log.Error("Read and parse failed", logger.Err(err))
 			conn.Close()
 			break
 		}
@@ -103,6 +104,7 @@ func (handler *URouterHandler) ServTcp(conn net.Conn) {
 			continue
 		}
 
+		handler.log.Info("Got uid", logger.String("uid", uid), logger.String("remote", conn.RemoteAddr().String()))
 		handler.rh.RedisSet(uid, mpdata)
 	}
 }

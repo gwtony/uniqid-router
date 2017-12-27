@@ -1,18 +1,18 @@
 package handler
 
 import (
-	"github.com/gwtony/gapi/log"
+	"github.com/gwtony/logger"
 	"github.com/gwtony/gapi/api"
 	//"github.com/gwtony/gapi/hserver"
 	"github.com/gwtony/gapi/config"
 )
 
 // InitContext inits uniqid router context
-func InitContext(conf *config.Config, log log.Log) error {
+func InitContext(conf *config.Config, log logger.Log) error {
 	cf := &URouterConfig{}
-	err := cf.ParseConfig(conf)
+	err := cf.ParseConfig(conf, log)
 	if err != nil {
-		log.Error("Macedon parse config failed")
+		log.Error("uniqid router parse config failed")
 		return err
 	}
 
